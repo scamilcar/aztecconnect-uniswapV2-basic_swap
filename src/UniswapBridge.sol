@@ -3,7 +3,7 @@
 pragma solidity >0.6;
 pragma experimental ABIEncoderV2;
 
-import  "./libraries/SafeMath.sol";
+import "./libraries/SafeMath.sol";
 import "./interfaces/IERC20.sol";
 
 
@@ -55,16 +55,12 @@ contract UniswapBridge is IDefiBridge {
     isAsync = false;
     uint256[] memory amounts;
     uint256 deadline = block.timestamp;
-    // CHANGED - This should check the pair exists on UNISWAP instead of blindly trying to swap.
-    if (inputAssetA.assetType == Types.AztecAssetType.ETH || outputAssetA.assetType == Types.AztecAssetType.ETH) {
-      require(factory.getPair(weth, outputAssetA.erc20Address) != address(0), "UniswapBridge: INVALID_PAIR");
-    } else {
-      require(factory.getPair(inputAssetA.erc20Address, outputAssetA.erc20Address) != address(0), "UniswapBridge: INVALID_PAIR");
-    }
+
     if (
       inputAssetA.assetType == Types.AztecAssetType.ETH &&
       outputAssetA.assetType == Types.AztecAssetType.ERC20
     ) {
+      require(factory.getPair(weth, outputAssetA.erc20Address) != address(0), "UniswapBridge: INVALID_PAIR");
       address[] memory path = new address[](2);
       path[0] = weth;
       path[1] = outputAssetA.erc20Address;
@@ -75,10 +71,13 @@ contract UniswapBridge is IDefiBridge {
         deadline
       );
       outputValueA = amounts[1];
+
+
     } else if (
       inputAssetA.assetType == Types.AztecAssetType.ERC20 &&
       outputAssetA.assetType == Types.AztecAssetType.ETH
     ) {
+      require(factory.getPair(inputAssetA.erc20Address, weth) != address(0), "UniswapBridge: INVALID_PAIR");
       address[] memory path = new address[](2);
       path[0] = inputAssetA.erc20Address;
       path[1] = weth;
@@ -94,8 +93,10 @@ contract UniswapBridge is IDefiBridge {
         deadline
       );
       outputValueA = amounts[1];
+
+      
     } else {
-      // CHANGED what about swapping tokens?
+      require(factory.getPair(inputAssetA.erc20Address, outputAssetA.erc20Address) != address(0), "UniswapBridge: INVALID_PAIR");
       address[] memory path = new address[](3);
       path[0] = inputAssetA.erc20Address;
       path[1] = weth;

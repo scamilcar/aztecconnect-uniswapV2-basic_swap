@@ -10,7 +10,7 @@ export DAPP_BUILD_OPTIMIZE_RUNS=1000000
 export DAPP_LINK_TEST_LIBRARIES=0
 export DAPP_TEST_VERBOSITY=2
 
-export DAPP_TEST_ADDRESS=0xcA8Fa8f0b631EcdB18Cda619C4Fc9d197c8aFfCa
+export DAPP_TEST_ADDRESS=0x28C6c06298d514Db089934071355E5743bf21d60
 
 [[ $(pwd) != ~ && -e .env ]] && . .env # Load in the .env file's env vars locally.
 
