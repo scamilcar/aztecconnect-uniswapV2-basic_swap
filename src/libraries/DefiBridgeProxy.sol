@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Copyright 2020 Spilsbury Holdings Ltd
-pragma solidity >=0.6.10 <0.8.0;
+pragma solidity >=0.6.10 ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
-import { IDefiBridge } from "./interfaces/IDefiBridge.sol";
-import { Types } from "./Types.sol";
+import "./SafeMath.sol";
+import "../interfaces/IDefiBridge.sol";
+import "./Types.sol";
 
 // import 'hardhat/console.sol';
 

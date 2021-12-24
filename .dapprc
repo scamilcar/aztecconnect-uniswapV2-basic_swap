@@ -1,0 +1,18 @@
+# ANSI color codes.
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+# Basic build/test configuration.
+export DAPP_SOLC_VERSION=0.8.6
+export DAPP_BUILD_OPTIMIZE=1
+export DAPP_BUILD_OPTIMIZE_RUNS=1000000
+export DAPP_LINK_TEST_LIBRARIES=0
+export DAPP_TEST_VERBOSITY=2
+
+export DAPP_TEST_ADDRESS=0xcA8Fa8f0b631EcdB18Cda619C4Fc9d197c8aFfCa
+
+[[ $(pwd) != ~ && -e .env ]] && . .env # Load in the .env file's env vars locally.
+
+export HEVM_RPC=yes # Enable RPC testing.
+export ETH_RPC_URL=$ETH_RPC_URL # Re-export from .env in case they didn't use the export keyword.

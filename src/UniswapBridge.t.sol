@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity >0.6;
 
-import "ds-test/test.sol";
-
+import "../lib/ds-test/src/test.sol";
 import "./UniswapBridge.sol";
+
+import "./libraries/Types.sol";
+
+import "./interfaces/IERC20.sol";
 
 contract UniswapBridgeTest is DSTest {
     
     UniswapBridge bridge;
-    AztecAsset dai;
-    AztecAsset usdc;
-    AztecAsset eth;
+    Types.AztecAsset dai;
+    Types.AztecAsset usdc;
+    Types.AztecAsset eth;
+    Types.AztecAsset inputAssetB;
+    Types.AztecAsset outputAssetB;
 
     address ROLLUP_PROCESSOR = address(this);
     address ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -21,18 +26,36 @@ contract UniswapBridgeTest is DSTest {
 
     function setUp() public {
         bridge = new UniswapBridge(ROLLUP_PROCESSOR, ROUTER, FACTORY);
-        eth = AztecAsset(1, address(0x1), AztecAssetType.ETH);
-        dai = AztecAsset(2, DAI, AztecAssetType.ERC20); 
-        usdc = AztecAsset(3, USDC, AztecAssetType.ERC20);
+        eth = Types.AztecAsset(1, address(0x1), Types.AztecAssetType.ETH);
+        dai = Types.AztecAsset(2, DAI, Types.AztecAssetType.ERC20); 
+        usdc = Types.AztecAsset(3, USDC, Types.AztecAssetType.ERC20);
+        inputAssetB = Types.AztecAsset(4, address(0x2), Types.AztecAssetType.ERC20);
+        outputAssetB = Types.AztecAsset(5, address(0x3), Types.AztecAssetType.ERC20);
+
     }
 
     function test_convert_ethForTokens() public {
+        (bool sent, ) = address(bridge).call{value: 1 ether}("u fool");
+        require(sent, "Failed to send Ether");
         uint256 inputValue = 1 ether;
-        AztecAsset inputAssetA = eth;
-        AztecAsset outputAsset = dai;
-        uint256 preBalance = IERC20.balance(bridge);
-        bridge.convert(inputassetA,, outputAssetA,, inputValue,,);
-        uint256 postBalance = IERC20.balance(bridge);
+        Types.AztecAsset memory inputAssetA = eth;
+        Types.AztecAsset memory outputAssetA = dai;
+        uint256 preBalanceInputAssetA = address(bridge).balance;
+        uint256 preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(address(bridge));
+        (uint outputValueA,,) = bridge.convert(
+            inputAssetA,
+            inputAssetB,
+            outputAssetA,
+            outputAssetB,
+            inputValue,
+            0,
+            0
+            );
+        uint256 postBalanceInputAssetA = address(bridge).balance;
+        uint256 postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(address(bridge));
+        assertEq(preBalanceInputAssetA - inputValue, postBalanceInputAssetA);
+        assertEq(preBalanceOutputAssetA + outputValueA, postBalanceOutputAssetA);
+
 
 
 
