@@ -14,6 +14,7 @@ contract UniswapBridgeTest is DSTest {
     Types.AztecAsset dai;
     Types.AztecAsset usdc;
     Types.AztecAsset eth;
+    Types.AztecAsset usdt;
     Types.AztecAsset inputAssetB;
     Types.AztecAsset outputAssetB;
 
@@ -23,6 +24,7 @@ contract UniswapBridgeTest is DSTest {
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
     uint256 FACTOR = 10**18;
 
@@ -31,8 +33,9 @@ contract UniswapBridgeTest is DSTest {
         eth = Types.AztecAsset(1, WETH, Types.AztecAssetType.ETH);
         dai = Types.AztecAsset(2, DAI, Types.AztecAssetType.ERC20); 
         usdc = Types.AztecAsset(3, USDC, Types.AztecAssetType.ERC20);
-        inputAssetB = Types.AztecAsset(4, address(0x2), Types.AztecAssetType.ERC20);
-        outputAssetB = Types.AztecAsset(5, address(0x3), Types.AztecAssetType.ERC20);
+        usdt = Types.AztecAsset(4, USDT, Types.AztecAssetType.ERC20);
+        inputAssetB = Types.AztecAsset(5, address(0x2), Types.AztecAssetType.ERC20);
+        outputAssetB = Types.AztecAsset(6, address(0x3), Types.AztecAssetType.ERC20);
 
     }
 
@@ -88,7 +91,7 @@ contract UniswapBridgeTest is DSTest {
         uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_postBalanceOutputAssetA = address(ROLLUP_PROCESSOR).balance;
         //emit log_named_uint("Post-swap balance of the bridge contract", bridge_postBalanceInputAssetA/FACTOR);
-        emit log_named_uint("Post-swap balance of the bridge contract", processor_postBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("Post-swap balance of the rollup processor", processor_postBalanceOutputAssetA/FACTOR);
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
@@ -96,12 +99,12 @@ contract UniswapBridgeTest is DSTest {
     function test_convert_tokensForTokens() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
-        Types.AztecAsset memory outputAssetA = usdc;
+        Types.AztecAsset memory outputAssetA = usdt;
         IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
         uint256 bridge_preBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
-        uint256 processor_preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(address(ROLLUP_PROCESSOR));
+        uint256 processor_preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
         emit log_named_uint("Pre-swap balance of the bridge contract", bridge_preBalanceInputAssetA/FACTOR);
-        //emit log_named_uint("Pre-swap balance of the rollup processor", processor_preBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("Pre-swap balance of the rollup processor", processor_preBalanceOutputAssetA/10**6);
         (uint outputValueA,,) = bridge.convert(
             inputAssetA,
             inputAssetB,
@@ -112,11 +115,11 @@ contract UniswapBridgeTest is DSTest {
             0
             );
         uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
-        uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(address(ROLLUP_PROCESSOR));
+        uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
         //emit log_named_uint("Post-swap balance of the bridge contract", bridge_postBalanceInputAssetA/FACTOR);
         emit log_named_uint("Post-swap balance of the rollup processor", processor_postBalanceOutputAssetA/10**6); // 6 is the number of USDC's decimals.
-        //assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
-        //assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
+        assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
+        assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
 

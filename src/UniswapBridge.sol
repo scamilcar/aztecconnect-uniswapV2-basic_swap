@@ -112,7 +112,7 @@ contract UniswapBridge is IDefiBridge {
         rollupProcessor,
         deadline
       );
-      outputValueA = amounts[1];
+      outputValueA = amounts[2];
       //revert("UniswapBridge: INCOMPATIBLE_ASSET_PAIR");
     }
   }
