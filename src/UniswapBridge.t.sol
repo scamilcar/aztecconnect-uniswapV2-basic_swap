@@ -10,13 +10,6 @@ import "./interfaces/IERC20.sol";
 
 contract UniswapBridgeTest is DSTest {
     
-    UniswapBridge bridge;
-    Types.AztecAsset dai;
-    Types.AztecAsset usdc;
-    Types.AztecAsset eth;
-    Types.AztecAsset usdt;
-    Types.AztecAsset inputAssetB;
-    Types.AztecAsset outputAssetB;
 
     address ROLLUP_PROCESSOR = address(this);
     address ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -26,6 +19,14 @@ contract UniswapBridgeTest is DSTest {
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
+    UniswapBridge bridge;
+    Types.AztecAsset dai;
+    Types.AztecAsset usdc;
+    Types.AztecAsset eth;
+    Types.AztecAsset usdt;
+    Types.AztecAsset inputAssetB;
+    Types.AztecAsset outputAssetB;
+    
     uint256 FACTOR = 10**18;
 
     function setUp() public {
@@ -41,7 +42,8 @@ contract UniswapBridgeTest is DSTest {
 
     receive() external payable {}
     fallback() external payable {}
-
+    
+    // Should test if it is possible to swap Ether for ERC20 tokens. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_ethForTokens() public {
         (bool sent, ) = address(bridge).call{value: 1 ether}("");
         require(sent, "Failed to send Ether");
@@ -50,8 +52,7 @@ contract UniswapBridgeTest is DSTest {
         Types.AztecAsset memory outputAssetA = dai;
         uint256 bridge_preBalanceInputAssetA = address(bridge).balance;
         uint256 processor_preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
-        emit log_named_uint("Pre-swap balance of the bridge contract", bridge_preBalanceInputAssetA/FACTOR);
-        //emit log_named_uint("Pre-swap balance of the rollup processor", processor_preBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("amount of ETH swapped", inputValue/FACTOR);
         (uint outputValueA,,) = bridge.convert(
             inputAssetA,
             inputAssetB,
@@ -63,13 +64,12 @@ contract UniswapBridgeTest is DSTest {
             );
         uint256 bridge_postBalanceInputAssetA = address(bridge).balance;
         uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
-        //emit log_named_uint("Post-swap balance of the bridge contract", bridge_postBalanceInputAssetA/FACTOR);
-        emit log_named_uint("Post-swap balance of the rollup processor", processor_postBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("amount of DAI received", outputValueA/FACTOR);
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
-
+    // Should test if it is possible to swap ERC20 tokens for ETH. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForEth() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
@@ -77,8 +77,7 @@ contract UniswapBridgeTest is DSTest {
         IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
         uint256 bridge_preBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_preBalanceOutputAssetA = address(ROLLUP_PROCESSOR).balance;
-        emit log_named_uint("Pre-swap balance of the bridge contract", bridge_preBalanceInputAssetA/FACTOR);
-        //emit log_named_uint("Pre-swap balance of the rollup processor", processor_preBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("amount of DAI swapped", inputValue/FACTOR);
         (uint outputValueA,,) = bridge.convert(
             inputAssetA,
             inputAssetB,
@@ -90,12 +89,12 @@ contract UniswapBridgeTest is DSTest {
             );
         uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_postBalanceOutputAssetA = address(ROLLUP_PROCESSOR).balance;
-        //emit log_named_uint("Post-swap balance of the bridge contract", bridge_postBalanceInputAssetA/FACTOR);
-        emit log_named_uint("Post-swap balance of the rollup processor", processor_postBalanceOutputAssetA/FACTOR);
+        emit log_named_uint("approximate amount of ETH received", outputValueA/FACTOR);
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
+    // Should test if it is possible to swap ERC20 tokens for ERC20 tokens. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForTokens() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
@@ -103,8 +102,7 @@ contract UniswapBridgeTest is DSTest {
         IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
         uint256 bridge_preBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
-        emit log_named_uint("Pre-swap balance of the bridge contract", bridge_preBalanceInputAssetA/FACTOR);
-        emit log_named_uint("Pre-swap balance of the rollup processor", processor_preBalanceOutputAssetA/10**6);
+        emit log_named_uint("amount of DAI swapped", inputValue/FACTOR);
         (uint outputValueA,,) = bridge.convert(
             inputAssetA,
             inputAssetB,
@@ -116,8 +114,7 @@ contract UniswapBridgeTest is DSTest {
             );
         uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
-        //emit log_named_uint("Post-swap balance of the bridge contract", bridge_postBalanceInputAssetA/FACTOR);
-        emit log_named_uint("Post-swap balance of the rollup processor", processor_postBalanceOutputAssetA/10**6); // 6 is the number of USDC's decimals.
+        emit log_named_uint("amount of USDT received", outputValueA/10**6);
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
