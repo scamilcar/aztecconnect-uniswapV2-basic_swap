@@ -69,6 +69,7 @@ contract UniswapBridgeTest is DSTest {
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
+
     // Should test if it is possible to swap ERC20 tokens for ETH. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForEth() public {
         uint256 inputValue = 10000*FACTOR;
@@ -118,10 +119,4 @@ contract UniswapBridgeTest is DSTest {
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
-
-
-
-
-
-
 }

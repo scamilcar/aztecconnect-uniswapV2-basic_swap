@@ -95,7 +95,10 @@ contract UniswapBridge is IDefiBridge {
       outputValueA = amounts[1];
 
       
-    } else {
+    } else if (
+      inputAssetA.assetType == Types.AztecAssetType.ERC20 &&
+      outputAssetA.assetType == Types.AztecAssetType.ERC20
+    ) {
       require(factory.getPair(inputAssetA.erc20Address, outputAssetA.erc20Address) != address(0), "UniswapBridge: INVALID_PAIR");
       address[] memory path = new address[](3);
       path[0] = inputAssetA.erc20Address;
@@ -113,9 +116,10 @@ contract UniswapBridge is IDefiBridge {
         deadline
       );
       outputValueA = amounts[2];
-      //revert("UniswapBridge: INCOMPATIBLE_ASSET_PAIR");
+    } else {
+      revert("UniswapBridge: INCOMPATIBLE_ASSET_PAIR");
     }
-  }
+}
 
   function canFinalise(
     uint256 /*interactionNonce*/
