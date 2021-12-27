@@ -18,12 +18,15 @@ contract UniswapBridgeTest is DSTest {
     address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address FLX = 0x6243d8CEA23066d098a15582d81a598b4e8391F4;
 
     UniswapBridge bridge;
     Types.AztecAsset dai;
     Types.AztecAsset usdc;
     Types.AztecAsset eth;
     Types.AztecAsset usdt;
+    Types.AztecAsset flx;
+    Types.AztecAsset random_erc20;
     Types.AztecAsset inputAssetB;
     Types.AztecAsset outputAssetB;
     
@@ -35,15 +38,18 @@ contract UniswapBridgeTest is DSTest {
         dai = Types.AztecAsset(2, DAI, Types.AztecAssetType.ERC20); 
         usdc = Types.AztecAsset(3, USDC, Types.AztecAssetType.ERC20);
         usdt = Types.AztecAsset(4, USDT, Types.AztecAssetType.ERC20);
-        inputAssetB = Types.AztecAsset(5, address(0x2), Types.AztecAssetType.ERC20);
-        outputAssetB = Types.AztecAsset(6, address(0x3), Types.AztecAssetType.ERC20);
+        flx = Types.AztecAsset(5, FLX, Types.AztecAssetType.ERC20);
+        random_erc20 = Types.AztecAsset(6, address(1), Types.AztecAssetType.ERC20);
+        inputAssetB = Types.AztecAsset(7, address(0x2), Types.AztecAssetType.ERC20);
+        outputAssetB = Types.AztecAsset(8, address(0x3), Types.AztecAssetType.ERC20);
 
     }
 
     receive() external payable {}
     fallback() external payable {}
     
-    // Should test if it is possible to swap Ether for ERC20 tokens. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
+    // Should test if it is possible to swap Ether for ERC20 tokens. 
+    //Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_ethForTokens() public {
         (bool sent, ) = address(bridge).call{value: 1 ether}("");
         require(sent, "Failed to send Ether");
@@ -70,7 +76,8 @@ contract UniswapBridgeTest is DSTest {
     }
 
 
-    // Should test if it is possible to swap ERC20 tokens for ETH. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
+    // Should test if it is possible to swap ERC20 tokens for ETH. 
+    // Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForEth() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
@@ -95,8 +102,9 @@ contract UniswapBridgeTest is DSTest {
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
-    // Should test if it is possible to swap ERC20 tokens for ERC20 tokens. Asserts pre and post swap balances are correct. Logs amounts swapped and received.
-    function test_convert_tokensForTokens() public {
+    // Should test if it is possible to swap ERC20 tokens for ERC20 tokens when their pair exists. 
+    // Asserts pre and post swap balances are correct. Logs amounts swapped and received.
+    function test_convert_tokensForTokens_paired() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
         Types.AztecAsset memory outputAssetA = usdt;
@@ -119,4 +127,53 @@ contract UniswapBridgeTest is DSTest {
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
+
+    function test_convert_tokensForTokens_weth_paired() public {
+        uint256 inputValue = 10000*FACTOR;
+        Types.AztecAsset memory inputAssetA = dai;
+        Types.AztecAsset memory outputAssetA = flx;
+        IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
+        uint256 bridge_preBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
+        uint256 processor_preBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
+        emit log_named_uint("amount of DAI swapped", inputValue/FACTOR);
+        (uint outputValueA,,) = bridge.convert(
+            inputAssetA,
+            inputAssetB,
+            outputAssetA,
+            outputAssetB,
+            inputValue,
+            0,
+            0
+            );
+        uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
+        uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
+        emit log_named_uint("amount of FLX received", outputValueA/FACTOR);
+        assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
+        assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
+    }
+
+
+    function testFail_convert_tokensForTokens_invalid_pair() public {
+        uint256 inputValue = 10000*FACTOR;
+        Types.AztecAsset memory inputAssetA = dai;
+        Types.AztecAsset memory outputAssetA = random_erc20;
+        IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
+        (uint outputValueA,,) = bridge.convert(
+            inputAssetA,
+            inputAssetB,
+            outputAssetA,
+            outputAssetB,
+            inputValue,
+            0,
+            0
+            );
+    }
+
+    /*function testFail_convert_invalid_pair() public {
+        uint256 inputValue = 10000*FACTOR;
+        Types.AztecAsset memory inputAssetA = dai;
+        Types.AztecAsset memory outputAssetA = usdt;
+        IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);*/
+
+    
 }
