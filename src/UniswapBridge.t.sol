@@ -16,17 +16,16 @@ contract UniswapBridgeTest is DSTest {
     address FACTORY = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;  
     address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address FLX = 0x6243d8CEA23066d098a15582d81a598b4e8391F4;
 
     UniswapBridge bridge;
     Types.AztecAsset dai;
-    Types.AztecAsset usdc;
     Types.AztecAsset eth;
     Types.AztecAsset usdt;
     Types.AztecAsset flx;
     Types.AztecAsset random_erc20;
+    // For tests purposes
     Types.AztecAsset inputAssetB;
     Types.AztecAsset outputAssetB;
     
@@ -36,12 +35,11 @@ contract UniswapBridgeTest is DSTest {
         bridge = new UniswapBridge(ROLLUP_PROCESSOR, ROUTER, FACTORY);
         eth = Types.AztecAsset(1, WETH, Types.AztecAssetType.ETH);
         dai = Types.AztecAsset(2, DAI, Types.AztecAssetType.ERC20); 
-        usdc = Types.AztecAsset(3, USDC, Types.AztecAssetType.ERC20);
-        usdt = Types.AztecAsset(4, USDT, Types.AztecAssetType.ERC20);
-        flx = Types.AztecAsset(5, FLX, Types.AztecAssetType.ERC20);
-        random_erc20 = Types.AztecAsset(6, address(1), Types.AztecAssetType.ERC20);
-        inputAssetB = Types.AztecAsset(7, address(0x2), Types.AztecAssetType.ERC20);
-        outputAssetB = Types.AztecAsset(8, address(0x3), Types.AztecAssetType.ERC20);
+        usdt = Types.AztecAsset(3, USDT, Types.AztecAssetType.ERC20);
+        flx = Types.AztecAsset(4, FLX, Types.AztecAssetType.ERC20);
+        random_erc20 = Types.AztecAsset(5, address(1), Types.AztecAssetType.ERC20);
+        inputAssetB = Types.AztecAsset(6, address(2), Types.AztecAssetType.ERC20);
+        outputAssetB = Types.AztecAsset(7, address(3), Types.AztecAssetType.ERC20);
 
     }
 
