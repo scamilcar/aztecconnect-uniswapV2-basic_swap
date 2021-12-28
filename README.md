@@ -29,7 +29,7 @@ _NOTE: Run the installer and dapptools under rosetta 2 if you're on M1 Mac._
 $ curl https://dapp.tools/install | sh
 ```  
 (See the [dapptools installation guide](https://github.com/dapphub/dapptools#installation) for further installation tips.)
-* Clone this repository, `cd` into it, in the `.env` set "ETH_RPC_URL" to a valid rpc url  
+* Clone this repository, `cd` into it, in the `.env` set `ETH_RPC_URL` to a valid rpc url  
 connected to Ethereum mainnet. You can use Alchemy or Infura for this.
 * Once your rpc url set, while in the root directory of the project, run:
 ```
