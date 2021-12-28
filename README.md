@@ -6,7 +6,7 @@
   _0x28C6c06298d514Db089934071355E5743bf21d60_ for tests purposes
 (see `.dapprc`).  
   
-  `src/Uniswap.t.sol` is the test contract. The address of the `rollupProcessor` is set to the  
+  `src/UniswapBridge.t.sol` is the test contract. The address of the `rollupProcessor` is set to the  
   address of this contract, once again for tests purposes.
   
 The purpose of the bridge contrat is to be able to receive an `inputAssetA` (ERC20 tokens or  
