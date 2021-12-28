@@ -33,6 +33,7 @@ $ curl https://dapp.tools/install | sh
 connected to Ethereum mainnet. You can use Alchemy or Infura for this.
 * Once your rpc url set, while in the root directory of the project, run:
 ```
+$ dapp update
 $ dapp test
 ```
 This should be the output (logs depending on the price of `outputAssetA` at the time of testing):
