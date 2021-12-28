@@ -102,7 +102,7 @@ contract UniswapBridgeTest is DSTest {
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
-    // Should test if it is possible to swap ERC20 tokens for ERC20 tokens when their pair exists. 
+    // Should test if it is possible to swap ERC20 tokens for ERC20 tokens whose pair exists. 
     // Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForTokens_paired() public {
         uint256 inputValue = 10000*FACTOR;
@@ -128,6 +128,8 @@ contract UniswapBridgeTest is DSTest {
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
+    // Should test if it is possible to swap ERC20 tokens whose pair does not exist but which are both paired with ETH.
+    // Asserts pre and post swap balances are correct. Logs amounts swapped and received.
     function test_convert_tokensForTokens_weth_paired() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
@@ -147,18 +149,19 @@ contract UniswapBridgeTest is DSTest {
             );
         uint256 bridge_postBalanceInputAssetA = IERC20(inputAssetA.erc20Address).balanceOf(address(bridge));
         uint256 processor_postBalanceOutputAssetA = IERC20(outputAssetA.erc20Address).balanceOf(ROLLUP_PROCESSOR);
-        emit log_named_uint("amount of FLX received", outputValueA/FACTOR);
+        emit log_named_uint("approximate amount of FLX received", outputValueA/FACTOR);
         assertEq(bridge_preBalanceInputAssetA - inputValue, bridge_postBalanceInputAssetA);
         assertEq(processor_preBalanceOutputAssetA + outputValueA, processor_postBalanceOutputAssetA);
     }
 
-
+    // Should test if it is possible to swaps ERC20 tokens whose pair does not exist and with one of them not being paired with ETH.
+    // should fail since 'random_erc20' is not paired with ETH.
     function testFail_convert_tokensForTokens_invalid_pair() public {
         uint256 inputValue = 10000*FACTOR;
         Types.AztecAsset memory inputAssetA = dai;
         Types.AztecAsset memory outputAssetA = random_erc20;
         IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);
-        (uint outputValueA,,) = bridge.convert(
+        bridge.convert(
             inputAssetA,
             inputAssetB,
             outputAssetA,
@@ -168,12 +171,4 @@ contract UniswapBridgeTest is DSTest {
             0
             );
     }
-
-    /*function testFail_convert_invalid_pair() public {
-        uint256 inputValue = 10000*FACTOR;
-        Types.AztecAsset memory inputAssetA = dai;
-        Types.AztecAsset memory outputAssetA = usdt;
-        IERC20(inputAssetA.erc20Address).transfer(address(bridge), inputValue);*/
-
-    
 }

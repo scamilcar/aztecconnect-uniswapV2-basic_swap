@@ -94,7 +94,7 @@ contract UniswapBridge is IDefiBridge {
     outputValueA = amounts[1];
   }
 
-
+  
   function _swapTokensForEth(
     uint256 _inputValue,
     address _inputAsset
